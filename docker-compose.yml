@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  nw-task-manager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nw-task-manager
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Shanghai
+    networks:
+      - nw-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nw-task.rule=Host(`localhost`)"
+      - "traefik.http.services.nw-task.loadbalancer.server.port=80"
+
+networks:
+  nw-network:
+    driver: bridge

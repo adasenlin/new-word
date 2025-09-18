@@ -1,0 +1,3607 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新世界任务管理系统 - 完整版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-title {
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+            cursor: pointer;
+        }
+
+        .demo-info {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .demo-title {
+            color: #ffd700;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .demo-accounts {
+            display: grid;
+            gap: 10px;
+        }
+
+        .demo-account {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .account-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .account-role {
+            font-size: 0.9em;
+            color: #ccc;
+        }
+
+        .quick-login {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            cursor: pointer;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #ffd700;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .form-input::placeholder {
+            color: #ccc;
+        }
+
+        .login-btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .main-container {
+            display: none;
+            padding: 20px;
+            max-width: 95vw;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .welcome-text {
+            font-size: 1.5em;
+            color: #ffd700;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 2px solid transparent;
+        }
+
+        .welcome-text:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 0.8em;
+        }
+
+        .btn-primary { background: linear-gradient(45deg, #4CAF50, #45a049); color: white; }
+        .btn-secondary { background: linear-gradient(45deg, #2196F3, #1976D2); color: white; }
+        .btn-danger { background: linear-gradient(45deg, #f44336, #d32f2f); color: white; }
+        .btn-warning { background: linear-gradient(45deg, #ff9800, #f57c00); color: white; }
+        .btn-success { background: linear-gradient(45deg, #8bc34a, #689f38); color: white; }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .employee-panel {
+            display: none;
+        }
+
+        .admin-panel {
+            display: none;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-title {
+            color: #ffd700;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-subtitle {
+            color: #ccc;
+            font-size: 0.9em;
+        }
+
+        .task-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .panel-title {
+            font-size: 1.8em;
+            color: #ffd700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .global-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .progress-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.2);
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+        }
+
+        .batch-server-controls {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .batch-server-title {
+            color: #ffd700;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .batch-server-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .batch-select {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 10px 15px;
+            color: white;
+            font-size: 1em;
+            min-width: 200px;
+        }
+
+        .batch-select:focus {
+            outline: none;
+            border-color: #ffd700;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .collapsible {
+            cursor: pointer;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .collapsible:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .collapsible.active {
+            background: rgba(255, 215, 0, 0.2);
+        }
+
+        .content {
+            display: none;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .content.show {
+            display: block;
+        }
+
+        .server-management-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .server-list-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .server-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .server-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .server-item.selected {
+            background: rgba(255, 215, 0, 0.3);
+            border: 1px solid #ffd700;
+        }
+
+        .server-checkbox {
+            margin-right: 10px;
+        }
+
+        .batch-textarea {
+            width: 100%;
+            min-height: 120px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            color: white;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            margin: 10px 0;
+        }
+
+        .batch-textarea:focus {
+            outline: none;
+            border-color: #ffd700;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .batch-textarea::placeholder {
+            color: #ccc;
+        }
+
+        .management-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        /* 搜索和筛选功能样式 */
+        .search-filter-section {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .search-filter-title {
+            color: #ffd700;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .search-filter-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .search-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 10px 15px;
+            color: white;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #ffd700;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .search-input::placeholder {
+            color: #ccc;
+        }
+
+        .filter-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 10px 15px;
+            color: white;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #ffd700;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .search-results-info {
+            color: #ffd700;
+            font-size: 0.9em;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        /* 快捷键提示样式 */
+        .shortcuts-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            z-index: 1000;
+            display: none;
+            max-width: 300px;
+        }
+
+        .shortcuts-title {
+            color: #ffd700;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .shortcut-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .shortcut-key {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        /* 移动端优化 */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 10px;
+            z-index: 1000;
+        }
+
+        .mobile-menu-buttons {
+            display: flex;
+            justify-content: space-around;
+            gap: 5px;
+        }
+
+        .mobile-btn {
+            flex: 1;
+            padding: 8px 4px;
+            font-size: 0.8em;
+            border-radius: 5px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+        }
+
+        .mobile-btn.active {
+            background: rgba(255, 215, 0, 0.3);
+            color: #ffd700;
+        }
+
+        /* 数据备份恢复样式 */
+        .backup-restore-section {
+            background: rgba(0, 150, 255, 0.1);
+            border: 2px solid rgba(0, 150, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .backup-restore-title {
+            color: #0096ff;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .backup-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-input {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 10px 15px;
+            background: rgba(0, 150, 255, 0.2);
+            border: 2px solid rgba(0, 150, 255, 0.5);
+            border-radius: 8px;
+            color: #0096ff;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-label:hover {
+            background: rgba(0, 150, 255, 0.3);
+        }
+
+        .windows-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            min-height: 600px;
+        }
+
+        .window-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            cursor: move;
+            transition: all 0.3s ease;
+            resize: both;
+            min-width: 280px;
+            min-height: 400px;
+            max-width: 600px;
+            max-height: 800px;
+            position: relative;
+        }
+
+        .window-card:hover {
+            border-color: rgba(255, 215, 0, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .window-card.dragging {
+            opacity: 0.8;
+            transform: rotate(2deg);
+            z-index: 1000;
+        }
+
+        .window-card.drag-over {
+            border-color: #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .resize-handle {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(-45deg, transparent 0%, transparent 40%, #ffd700 40%, #ffd700 60%, transparent 60%);
+            cursor: nw-resize;
+            z-index: 10;
+        }
+
+        .window-header {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .window-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #ffd700;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 2px solid transparent;
+        }
+
+        .window-title:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .window-progress {
+            font-size: 0.8em;
+            color: #ccc;
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 6px;
+        }
+
+        .window-content {
+            height: calc(100% - 60px);
+            overflow-y: auto;
+        }
+
+        .zones-tabs {
+            display: flex;
+            background: rgba(0, 0, 0, 0.3);
+            overflow-x: auto;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .zone-tab {
+            padding: 8px 12px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: #ccc;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-size: 0.85em;
+            position: relative;
+        }
+
+        .zone-tab.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffd700;
+            border-bottom: 3px solid #ffd700;
+        }
+
+        .zone-tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .zone-tab-content {
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 3px;
+            border: 1px solid transparent;
+        }
+
+        .zone-tab-content:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .zone-delete-btn {
+            margin-left: 6px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
+            cursor: pointer;
+            display: none;
+        }
+
+        .zone-tab:hover .zone-delete-btn {
+            display: inline-block;
+        }
+
+        .zone-add-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        .zone-add-btn:hover {
+            background: #45a049;
+        }
+
+        .zone-content {
+            padding: 15px;
+            display: none;
+            height: calc(100% - 40px);
+            overflow-y: auto;
+        }
+
+        .zone-content.active {
+            display: block;
+        }
+
+        .zone-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 0.85em;
+        }
+
+        .zone-progress-info {
+            color: #ffd700;
+        }
+
+        .server-select-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .server-select-label {
+            color: #ffd700;
+            font-weight: bold;
+            white-space: nowrap;
+            font-size: 0.8em;
+        }
+
+        .custom-select {
+            position: relative;
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+
+        .select-display {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            padding: 6px 10px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-width: 120px;
+            transition: all 0.3s ease;
+            font-size: 0.8em;
+        }
+
+        .select-display:hover {
+            border-color: #ffd700;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .select-arrow {
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 4px solid #fff;
+            transition: transform 0.3s ease;
+        }
+
+        .select-display.open .select-arrow {
+            transform: rotate(180deg);
+        }
+
+        .select-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            max-height: 150px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .select-options.show {
+            display: block;
+        }
+
+        .select-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8em;
+        }
+
+        .select-option:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .select-option.selected {
+            background: rgba(255, 215, 0, 0.3);
+            color: #ffd700;
+        }
+
+        .add-server-input {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid #4CAF50;
+            border-radius: 5px;
+            padding: 6px 10px;
+            color: white;
+            font-size: 12px;
+            width: 100%;
+            margin-bottom: 5px;
+        }
+
+        .add-server-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .add-server-input::placeholder {
+            color: #ccc;
+        }
+
+        .characters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
+        .character-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            padding: 8px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .character-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .character-card.completed {
+            opacity: 0.6;
+        }
+
+        .character-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .character-checkbox {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .character-delete {
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .character-card:hover .character-delete {
+            opacity: 1;
+        }
+
+        .character-server {
+            font-size: 0.7em;
+            color: #ffd700;
+            font-weight: bold;
+            margin-bottom: 4px;
+            text-align: center;
+            background: rgba(255, 215, 0, 0.2);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .character-name {
+            font-weight: bold;
+            font-size: 0.85em;
+            cursor: pointer;
+            padding: 3px 6px;
+            border-radius: 3px;
+            border: 2px solid transparent;
+            text-align: center;
+        }
+
+        .character-name:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .completed .character-name {
+            text-decoration: line-through;
+        }
+
+        .add-character-btn {
+            background: rgba(76, 175, 80, 0.3);
+            border: 2px dashed #4CAF50;
+            border-radius: 6px;
+            padding: 15px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #4CAF50;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+
+        .add-character-btn:hover {
+            background: rgba(76, 175, 80, 0.5);
+            border-style: solid;
+        }
+
+        .edit-input {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid #ffd700;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: inherit;
+            font-family: inherit;
+            text-align: center;
+            width: 100%;
+        }
+
+        .edit-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .title-edit-input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid #ffd700;
+            color: #ffd700;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1.5em;
+            font-family: inherit;
+            font-weight: bold;
+            text-align: center;
+            width: 100%;
+        }
+
+        .title-edit-input:focus {
+            outline: none;
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .submit-section {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, #ff9800, #f57c00);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .admin-table {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .table th {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .performance-bar {
+            background: rgba(255, 255, 255, 0.2);
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .performance-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            transition: width 0.3s ease;
+        }
+
+        .performance-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.8em;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+        }
+
+        .user-management-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .user-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: end;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            color: #ffd700;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .close {
+            color: #ccc;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #fff;
+        }
+
+        @media (max-width: 1400px) {
+            .windows-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 1100px) {
+            .windows-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .windows-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .windows-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .characters-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+
+            .mobile-menu {
+                display: block;
+            }
+
+            .header-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .search-filter-controls {
+                grid-template-columns: 1fr;
+            }
+
+            .backup-controls {
+                grid-template-columns: 1fr;
+            }
+
+            .shortcuts-panel {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                right: auto;
+                max-width: 90vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录界面 -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-card">
+            <h1 class="login-title" ondblclick="editSystemTitle()">🎮 新世界任务管理系统</h1>
+            
+            <div class="demo-info">
+                <div class="demo-title">👥 员工账号</div>
+                <div class="demo-accounts" id="demoAccounts">
+                    <div class="demo-account">
+                        <div class="account-info">
+                            <div><strong>admin</strong></div>
+                            <div class="account-role">系统管理员</div>
+                        </div>
+                        <button class="quick-login" onclick="quickLogin('admin', 'admin')">快速登录</button>
+                    </div>
+                </div>
+            </div>
+            
+            <form class="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label class="form-label" for="username">用户名</label>
+                    <input type="text" id="username" class="form-input" placeholder="请输入用户名" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="password">密码</label>
+                    <input type="password" id="password" class="form-input" placeholder="请输入密码" required>
+                </div>
+                <button type="submit" class="login-btn">登录</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 用户详情模态框 -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">用户配置</div>
+                <span class="close" onclick="closeUserModal()">&times;</span>
+            </div>
+            <div class="user-form">
+                <div class="form-group">
+                    <label class="form-label">用户名</label>
+                    <input type="text" id="modalUsername" class="form-input" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">姓名</label>
+                    <input type="text" id="modalName" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">部门</label>
+                    <input type="text" id="modalDepartment" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">组机数量</label>
+                    <input type="number" id="modalWindows" class="form-input" min="1" max="10">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">每组机号机数</label>
+                    <input type="number" id="modalZones" class="form-input" min="1" max="10">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">每号机角色数</label>
+                    <input type="number" id="modalCharacters" class="form-input" min="1" max="20">
+                </div>
+            </div>
+            <div class="management-buttons">
+                <button class="btn btn-primary" onclick="saveUserConfig()">保存配置</button>
+                <button class="btn btn-secondary" onclick="closeUserModal()">取消</button>
+                <button class="btn btn-danger" onclick="deleteUser()" id="deleteUserBtn">删除用户</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主界面 -->
+    <div class="main-container" id="mainContainer">
+        <!-- 头部 -->
+        <div class="header">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">👤</div>
+                <div>
+                    <div class="welcome-text" id="welcomeText" ondblclick="editWelcomeText()">欢迎回来，<span id="userName">用户</span></div>
+                    <div style="color: #ccc; margin-top: 5px;" id="userRole">员工</div>
+                </div>
+            </div>
+            <div class="header-controls">
+                <div style="color: #ffd700;">今日：<span id="currentDate"></span></div>
+                <button class="btn btn-danger" onclick="logout()">退出登录</button>
+            </div>
+        </div>
+
+        <!-- 员工面板 -->
+        <div class="employee-panel" id="employeePanel">
+            <!-- 统计卡片 -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">今日进度</div>
+                    <div class="stat-value" id="todayProgress">0%</div>
+                    <div class="stat-subtitle">已完成任务数量</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">本月进度</div>
+                    <div class="stat-value" id="monthProgress">0%</div>
+                    <div class="stat-subtitle">月度平均完成率</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">连续天数</div>
+                    <div class="stat-value" id="streakDays">0</div>
+                    <div class="stat-subtitle">连续完成任务</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">本月排名</div>
+                    <div class="stat-value" id="monthRank">#1</div>
+                    <div class="stat-subtitle">部门内排名</div>
+                </div>
+            </div>
+
+            <!-- 任务面板 -->
+            <div class="task-panel">
+                <div class="panel-title" id="employeePanelTitle" ondblclick="editPanelTitle()">🎯 我的任务面板</div>
+                
+                <!-- 搜索和筛选功能 -->
+                <div class="search-filter-section">
+                    <div class="search-filter-title">🔍 搜索和筛选</div>
+                    <div class="search-filter-controls">
+                        <input type="text" id="searchInput" class="search-input" placeholder="搜索角色名称..." onkeyup="filterCharacters()">
+                        <select id="serverFilter" class="filter-select" onchange="filterCharacters()">
+                            <option value="">所有服务器</option>
+                        </select>
+                        <select id="statusFilter" class="filter-select" onchange="filterCharacters()">
+                            <option value="">所有状态</option>
+                            <option value="completed">已完成</option>
+                            <option value="pending">未完成</option>
+                        </select>
+                        <button class="btn btn-secondary" onclick="clearFilters()">清除筛选</button>
+                    </div>
+                    <div class="search-results-info" id="searchResultsInfo"></div>
+                </div>
+
+                <!-- 数据备份恢复功能 -->
+                <div class="backup-restore-section">
+                    <div class="backup-restore-title">💾 数据管理</div>
+                    <div class="backup-controls">
+                        <button class="btn btn-primary" onclick="backupUserData()">📤 备份数据</button>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="restoreFile" class="file-input" accept=".json" onchange="restoreUserData(event)">
+                            <label for="restoreFile" class="file-input-label">📥 恢复数据</label>
+                        </div>
+                        <button class="btn btn-warning" onclick="exportToExcel()">📊 导出Excel</button>
+                        <button class="btn btn-success" onclick="exportToCSV()">📋 导出CSV</button>
+                    </div>
+                </div>
+                
+                <div class="global-controls">
+                    <button class="btn btn-primary" onclick="selectAllTasks()">🎯 全选所有任务</button>
+                    <button class="btn btn-secondary" onclick="clearAllTasks()">❌ 清除所有选择</button>
+                    <button class="btn btn-success" onclick="addWindow()">➕ 新增组机</button>
+                    <button class="btn btn-danger" onclick="resetAllProgress()">🔄 重置今日进度</button>
+                    <button class="btn btn-warning" onclick="toggleShortcuts()">⌨️ 快捷键</button>
+                </div>
+
+                <div class="progress-section">
+                    <h2>总体进度</h2>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="globalProgress">0/0 (0%)</div>
+                    </div>
+                </div>
+
+                <div class="batch-server-controls">
+                    <div class="batch-server-title">🌐 批量服务器管理</div>
+                    <div class="batch-server-row">
+                        <label for="batchServerSelect" style="color: #ffd700; font-weight: bold;">选择服务器:</label>
+                        <select id="batchServerSelect" class="batch-select">
+                            <option value="">请选择要批量应用的服务器</option>
+                        </select>
+                        <button class="btn btn-warning" onclick="applyBatchServer()">📋 应用到所有组机</button>
+                    </div>
+                    
+                    <div class="collapsible" onclick="toggleServerManagement()">⚙️ 服务器管理 (点击展开/收起)</div>
+                    <div class="content" id="serverManagementContent">
+                        <div class="server-management-section">
+                            <h4 style="color: #ffd700; margin-bottom: 10px;">📝 批量添加服务器</h4>
+                            <textarea id="batchAddServers" class="batch-textarea" placeholder="每行一个服务器名称，例如：&#10;AP——Delos 澳洲服&#10;US West——Eldorado 美西服&#10;EU Central——Aries 欧洲服"></textarea>
+                            <div class="management-buttons">
+                                <button class="btn btn-success" onclick="batchAddServers()">➕ 批量添加</button>
+                                <button class="btn btn-secondary" onclick="loadDefaultServers()">🔄 恢复默认服务器</button>
+                            </div>
+                        </div>
+                        
+                        <div class="server-management-section">
+                            <h4 style="color: #ffd700; margin-bottom: 10px;">🗑️ 批量删除服务器</h4>
+                            <div style="color: #ccc; font-size: 0.9em; margin-bottom: 10px;">选择要删除的服务器（可多选）:</div>
+                            <div class="server-list-container" id="serverListForDeletion">
+                                <!-- 动态生成服务器列表 -->
+                            </div>
+                            <div class="management-buttons">
+                                <button class="btn btn-primary" onclick="selectAllServers()">✅ 全选</button>
+                                <button class="btn btn-secondary" onclick="deselectAllServers()">❌ 全不选</button>
+                                <button class="btn btn-danger" onclick="batchDeleteServers()">🗑️ 删除选中</button>
+                            </div>
+                        </div>
+                        
+                        <div class="server-management-section">
+                            <h4 style="color: #ffd700; margin-bottom: 10px;">📋 当前服务器列表</h4>
+                            <div class="server-list-container" id="currentServerList">
+                                <!-- 动态显示当前服务器列表 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="windows-container" id="windowsContainer">
+                    <!-- 动态生成窗口 -->
+                </div>
+
+                <div class="submit-section">
+                    <div style="margin-bottom: 15px; font-size: 1.1em;">
+                        ⚠️ 完成任务后请及时提交，管理员将根据提交记录计算绩效
+                    </div>
+                    <button class="submit-btn" onclick="submitProgress()">📤 提交今日进度</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 管理员面板 -->
+        <div class="admin-panel" id="adminPanel">
+            <!-- 概览统计 -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">今日总体完成率</div>
+                    <div class="stat-value" id="adminTodayProgress">0%</div>
+                    <div class="stat-subtitle">所有员工平均</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">活跃员工</div>
+                    <div class="stat-value" id="onlineEmployees">0</div>
+                    <div class="stat-subtitle">已提交进度人数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">本月最佳员工</div>
+                    <div class="stat-value" id="bestEmployee">-</div>
+                    <div class="stat-subtitle">完成率最高</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">团队总任务</div>
+                    <div class="stat-value" id="totalTasks">0</div>
+                    <div class="stat-subtitle">今日分配任务数</div>
+                </div>
+            </div>
+
+            <!-- 用户管理 -->
+            <div class="user-management-panel">
+                <div class="panel-title">👥 用户管理</div>
+                <div class="user-form">
+                    <div class="form-group">
+                        <label class="form-label">用户名</label>
+                        <input type="text" id="newUsername" class="form-input" placeholder="请输入用户名">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">姓名</label>
+                        <input type="text" id="newName" class="form-input" placeholder="请输入姓名">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">部门</label>
+                        <input type="text" id="newDepartment" class="form-input" placeholder="请输入部门">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">密码</label>
+                        <input type="password" id="newPassword" class="form-input" placeholder="请输入密码">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">组机数量</label>
+                        <input type="number" id="newWindows" class="form-input" placeholder="1-10" min="1" max="10" value="3">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">每组机号机数</label>
+                        <input type="number" id="newZones" class="form-input" placeholder="1-10" min="1" max="10" value="2">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">每号机角色数</label>
+                        <input type="number" id="newCharacters" class="form-input" placeholder="1-20" min="1" max="20" value="5">
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-success" onclick="createUser()">➕ 创建用户</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 员工进度表 -->
+            <div class="admin-table">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>员工姓名</th>
+                            <th>用户名</th>
+                            <th>部门</th>
+                            <th>任务配置</th>
+                            <th>今日进度</th>
+                            <th>本月完成率</th>
+                            <th>最后提交时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employeeTableBody">
+                        <!-- 动态生成员工数据 -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 管理操作 -->
+            <div class="task-panel">
+                <div class="panel-title">📊 管理工具</div>
+                <div class="global-controls">
+                    <button class="btn btn-primary" onclick="exportReport()">📈 导出报表</button>
+                    <button class="btn btn-secondary" onclick="resetAllEmployeeProgress()">🔄 重置所有进度</button>
+                    <button class="btn btn-warning" onclick="backupData()">💾 备份数据</button>
+                    <button class="btn btn-success" onclick="calculatePerformance()">💰 计算绩效</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 快捷键提示面板 -->
+    <div class="shortcuts-panel" id="shortcutsPanel">
+        <div class="shortcuts-title">⌨️ 快捷键</div>
+        <div class="shortcut-item">
+            <span>全选任务</span>
+            <span class="shortcut-key">Ctrl+A</span>
+        </div>
+        <div class="shortcut-item">
+            <span>清除选择</span>
+            <span class="shortcut-key">Ctrl+D</span>
+        </div>
+        <div class="shortcut-item">
+            <span>保存进度</span>
+            <span class="shortcut-key">Ctrl+S</span>
+        </div>
+        <div class="shortcut-item">
+            <span>提交进度</span>
+            <span class="shortcut-key">Ctrl+Enter</span>
+        </div>
+        <div class="shortcut-item">
+            <span>搜索</span>
+            <span class="shortcut-key">Ctrl+F</span>
+        </div>
+        <div class="shortcut-item">
+            <span>新增组机</span>
+            <span class="shortcut-key">Ctrl+N</span>
+        </div>
+        <div class="shortcut-item">
+            <span>显示/隐藏快捷键</span>
+            <span class="shortcut-key">F1</span>
+        </div>
+        <div class="shortcut-item">
+            <span>退出登录</span>
+            <span class="shortcut-key">Ctrl+Q</span>
+        </div>
+    </div>
+
+    <!-- 移动端菜单 -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-buttons">
+            <button class="mobile-btn active" onclick="switchMobileTab('tasks')">任务</button>
+            <button class="mobile-btn" onclick="switchMobileTab('servers')">服务器</button>
+            <button class="mobile-btn" onclick="switchMobileTab('backup')">备份</button>
+            <button class="mobile-btn" onclick="switchMobileTab('stats')">统计</button>
+        </div>
+    </div>
+
+    <script>
+        // 系统数据
+        let systemData = {
+            systemTitle: '🎮 新世界任务管理系统',
+            users: {
+                admin: {
+                    name: '系统管理员',
+                    role: 'admin',
+                    password: 'admin',
+                    department: '管理部'
+                }
+            },
+            serverList: [
+                'AP——Delos 澳洲服',
+                'US West——Eldorado 美西服', 
+                'US East——Valhalla 美东服',
+                'EU Central——Aries 欧洲服'
+            ]
+        };
+
+        let currentUser = null;
+        let currentDate = new Date().toLocaleDateString('zh-CN');
+        let gameData = {};
+        let progress = {};
+        let windowOrder = [];
+        let draggedElement = null;
+        let panelTitle = '🎯 我的任务面板';
+        let welcomeMessage = '欢迎回来';
+        let filteredCharacters = []; // 存储筛选后的角色数据
+        let isFiltering = false; // 是否正在筛选状态
+
+        // 初始化和数据管理
+        function init() {
+            loadSystemData();
+            updateDemoAccounts();
+            document.getElementById('currentDate').textContent = currentDate;
+        }
+
+        function loadSystemData() {
+            const savedData = localStorage.getItem('nw_system_data');
+            if (savedData) {
+                try {
+                    systemData = { ...systemData, ...JSON.parse(savedData) };
+                    if (systemData.systemTitle) {
+                        document.querySelector('.login-title').textContent = systemData.systemTitle;
+                    }
+                } catch (e) {
+                    console.log('加载系统数据失败，使用默认设置');
+                }
+            }
+        }
+
+        function saveSystemData() {
+            localStorage.setItem('nw_system_data', JSON.stringify(systemData));
+        }
+
+        function updateDemoAccounts() {
+            const container = document.getElementById('demoAccounts');
+            container.innerHTML = '';
+            
+            // 只显示员工账号的快速登录
+            const employees = Object.keys(systemData.users).filter(username => 
+                systemData.users[username].role === 'employee'
+            );
+            
+            if (employees.length === 0) {
+                // 如果没有员工账号，显示提示信息
+                const tipDiv = document.createElement('div');
+                tipDiv.className = 'demo-account';
+                tipDiv.innerHTML = `
+                    <div class="account-info">
+                        <div style="color: #ccc;">暂无员工账号</div>
+                        <div class="account-role">请联系管理员创建账号</div>
+                    </div>
+                `;
+                container.appendChild(tipDiv);
+            } else {
+                // 显示员工账号
+                employees.forEach(username => {
+                    const user = systemData.users[username];
+                    const userDiv = document.createElement('div');
+                    userDiv.className = 'demo-account';
+                    userDiv.innerHTML = `
+                        <div class="account-info">
+                            <div><strong>${username}</strong></div>
+                            <div class="account-role">员工 - ${user.department} ${user.name}</div>
+                        </div>
+                        <button class="quick-login" onclick="quickLogin('${username}', '123456')">快速登录</button>
+                    `;
+                    container.appendChild(userDiv);
+                });
+            }
+        }
+
+        // 编辑功能
+        function editSystemTitle() {
+            const titleElement = document.querySelector('.login-title');
+            const currentTitle = titleElement.textContent;
+            
+            const input = document.createElement('input');
+            input.className = 'title-edit-input';
+            input.value = currentTitle;
+            input.style.fontSize = '2em';
+            
+            titleElement.replaceWith(input);
+            input.focus();
+            input.select();
+            
+            function saveEdit() {
+                const newTitle = input.value.trim() || currentTitle;
+                systemData.systemTitle = newTitle;
+                
+                const newTitleElement = document.createElement('h1');
+                newTitleElement.className = 'login-title';
+                newTitleElement.textContent = newTitle;
+                newTitleElement.ondblclick = editSystemTitle;
+                
+                input.replaceWith(newTitleElement);
+                saveSystemData();
+            }
+            
+            input.addEventListener('blur', saveEdit);
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') saveEdit();
+            });
+        }
+
+        function editWelcomeText() {
+            const welcomeElement = document.getElementById('welcomeText');
+            const currentText = welcomeElement.textContent;
+            
+            const input = document.createElement('input');
+            input.className = 'title-edit-input';
+            input.value = currentText;
+            
+            welcomeElement.replaceWith(input);
+            input.focus();
+            input.select();
+            
+            function saveEdit() {
+                const newText = input.value.trim() || currentText;
+                welcomeMessage = newText;
+                
+                const newWelcomeElement = document.createElement('div');
+                newWelcomeElement.className = 'welcome-text';
+                newWelcomeElement.id = 'welcomeText';
+                newWelcomeElement.ondblclick = editWelcomeText;
+                newWelcomeElement.innerHTML = newText;
+                
+                input.replaceWith(newWelcomeElement);
+                saveUserPreferences();
+            }
+            
+            input.addEventListener('blur', saveEdit);
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') saveEdit();
+            });
+        }
+
+        function editPanelTitle() {
+            const titleElement = document.getElementById('employeePanelTitle');
+            const currentTitle = titleElement.textContent;
+            
+            const input = document.createElement('input');
+            input.className = 'title-edit-input';
+            input.value = currentTitle;
+            input.style.fontSize = '1.8em';
+            
+            titleElement.replaceWith(input);
+            input.focus();
+            input.select();
+            
+            function saveEdit() {
+                const newTitle = input.value.trim() || currentTitle;
+                panelTitle = newTitle;
+                
+                const newTitleElement = document.createElement('div');
+                newTitleElement.className = 'panel-title';
+                newTitleElement.id = 'employeePanelTitle';
+                newTitleElement.textContent = newTitle;
+                newTitleElement.ondblclick = editPanelTitle;
+                
+                input.replaceWith(newTitleElement);
+                saveUserPreferences();
+            }
+            
+            input.addEventListener('blur', saveEdit);
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') saveEdit();
+            });
+        }
+
+        // 登录相关函数
+        function quickLogin(username, password) {
+            document.getElementById('username').value = username;
+            document.getElementById('password').value = password;
+            handleLogin({ preventDefault: () => {} });
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (systemData.users[username] && systemData.users[username].password === password) {
+                currentUser = systemData.users[username];
+                currentUser.username = username;
+                showMainInterface();
+            } else {
+                alert('用户名或密码错误！');
+            }
+        }
+
+        function logout() {
+            if (currentUser && currentUser.role === 'employee') {
+                saveUserProgress();
+            }
+            currentUser = null;
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('mainContainer').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        function showMainInterface() {
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('mainContainer').style.display = 'block';
+            
+            // 更新用户信息
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('userRole').textContent = `${currentUser.department} - ${currentUser.role === 'admin' ? '管理员' : '员工'}`;
+            document.getElementById('userAvatar').textContent = currentUser.name.charAt(0);
+
+            if (currentUser.role === 'admin') {
+                showAdminPanel();
+            } else {
+                showEmployeePanel();
+            }
+        }
+
+        // 员工面板功能
+        function showEmployeePanel() {
+            document.getElementById('employeePanel').style.display = 'block';
+            document.getElementById('adminPanel').style.display = 'none';
+            
+            loadUserPreferences();
+            initEmployeeGameData();
+            loadEmployeeProgress();
+            updateBatchServerSelect();
+            initSearchFilters();
+            renderWindows();
+            updateAllProgress();
+            updateEmployeeStats();
+        }
+
+        function loadUserPreferences() {
+            const savedPrefs = localStorage.getItem(`user_prefs_${currentUser.username}`);
+            if (savedPrefs) {
+                try {
+                    const prefs = JSON.parse(savedPrefs);
+                    if (prefs.panelTitle) {
+                        panelTitle = prefs.panelTitle;
+                        document.getElementById('employeePanelTitle').textContent = panelTitle;
+                    }
+                    if (prefs.welcomeMessage) {
+                        welcomeMessage = prefs.welcomeMessage;
+                        document.getElementById('welcomeText').innerHTML = welcomeMessage;
+                    }
+                } catch (e) {
+                    console.log('加载用户偏好失败');
+                }
+            }
+        }
+
+        function saveUserPreferences() {
+            const prefs = {
+                panelTitle: panelTitle,
+                welcomeMessage: welcomeMessage
+            };
+            localStorage.setItem(`user_prefs_${currentUser.username}`, JSON.stringify(prefs));
+        }
+
+        function initEmployeeGameData() {
+            if (!currentUser.taskConfig) {
+                currentUser.taskConfig = {
+                    windows: 3,
+                    zonesPerWindow: 2,
+                    charactersPerZone: 4
+                };
+            }
+            
+            const config = currentUser.taskConfig;
+            gameData = {};
+            windowOrder = [];
+            
+            for (let windowId = 1; windowId <= config.windows; windowId++) {
+                windowOrder.push(windowId);
+                gameData[windowId] = {
+                    name: `${windowId}组机`,
+                    zones: {}
+                };
+                
+                for (let zoneId = 1; zoneId <= config.zonesPerWindow; zoneId++) {
+                    gameData[windowId].zones[zoneId] = {
+                        name: `${zoneId}号机`,
+                        characters: []
+                    };
+                    
+                    for (let charId = 1; charId <= config.charactersPerZone; charId++) {
+                        gameData[windowId].zones[zoneId].characters.push({
+                            name: `角色${charId}`,
+                            server: systemData.serverList[Math.floor(Math.random() * systemData.serverList.length)]
+                        });
+                    }
+                }
+            }
+            
+            // 加载已保存的游戏数据
+            const savedGameData = localStorage.getItem(`gameData_${currentUser.username}`);
+            if (savedGameData) {
+                try {
+                    const loaded = JSON.parse(savedGameData);
+                    // 合并加载的数据和默认数据
+                    Object.keys(loaded.gameData || {}).forEach(windowId => {
+                        if (gameData[windowId]) {
+                            Object.assign(gameData[windowId], loaded.gameData[windowId]);
+                        }
+                    });
+                    if (loaded.windowOrder) {
+                        windowOrder = loaded.windowOrder;
+                    }
+                } catch (e) {
+                    console.log('加载游戏数据失败');
+                }
+            }
+        }
+
+        function loadEmployeeProgress() {
+            const todayKey = currentDate;
+            if (!currentUser.dailyRecords) {
+                currentUser.dailyRecords = {};
+            }
+            progress = currentUser.dailyRecords[todayKey] || {};
+        }
+
+        function saveUserProgress() {
+            const todayKey = currentDate;
+            if (!currentUser.dailyRecords) {
+                currentUser.dailyRecords = {};
+            }
+            currentUser.dailyRecords[todayKey] = { ...progress };
+            
+            // 保存游戏数据
+            const userData = {
+                gameData: gameData,
+                windowOrder: windowOrder,
+                progress: progress,
+                lastUpdate: new Date().toISOString()
+            };
+            localStorage.setItem(`gameData_${currentUser.username}`, JSON.stringify(userData));
+            
+            // 保存到系统数据
+            saveSystemData();
+        }
+
+        function updateEmployeeStats() {
+            const totalCompleted = Object.values(progress).filter(Boolean).length;
+            const totalCharacters = getTotalCharacters();
+            const todayPercentage = totalCharacters > 0 ? Math.round((totalCompleted / totalCharacters) * 100) : 0;
+            
+            document.getElementById('todayProgress').textContent = `${todayPercentage}%`;
+            document.getElementById('monthProgress').textContent = `${currentUser.monthlyStats?.completionRate || 0}%`;
+            document.getElementById('streakDays').textContent = currentUser.monthlyStats?.streakDays || 0;
+            document.getElementById('monthRank').textContent = `#${currentUser.monthlyStats?.rank || 1}`;
+        }
+
+        function submitProgress() {
+            saveUserProgress();
+            
+            const totalCompleted = Object.values(progress).filter(Boolean).length;
+            const totalCharacters = getTotalCharacters();
+            const completionRate = totalCharacters > 0 ? Math.round((totalCompleted / totalCharacters) * 100) : 0;
+            
+            // 更新月度统计
+            if (!currentUser.monthlyStats) {
+                currentUser.monthlyStats = {
+                    completionRate: 0,
+                    rank: 1,
+                    streakDays: 0
+                };
+            }
+            
+            // 简单的统计更新逻辑
+            if (completionRate === 100) {
+                currentUser.monthlyStats.streakDays += 1;
+            }
+            
+            saveSystemData();
+            
+            alert(`✅ 进度提交成功！\n\n今日完成率：${completionRate}%\n完成任务：${totalCompleted}/${totalCharacters}\n\n管理员将根据此记录计算您的绩效奖金。`);
+        }
+
+        // [继续包含原有的所有员工端功能函数...]
+        // 这里包含所有原来的员工端功能：窗口管理、区域管理、角色管理、服务器管理等
+
+        // 服务器管理相关函数
+        function updateBatchServerSelect() {
+            const select = document.getElementById('batchServerSelect');
+            select.innerHTML = '<option value="">请选择要批量应用的服务器</option>';
+            
+            systemData.serverList.forEach(server => {
+                const option = document.createElement('option');
+                option.value = server;
+                option.textContent = server;
+                select.appendChild(option);
+            });
+        }
+
+        function applyBatchServer() {
+            const selectedServer = document.getElementById('batchServerSelect').value;
+            if (!selectedServer) {
+                alert('请先选择一个服务器！');
+                return;
+            }
+
+            if (confirm(`确定要将所有组机的服务器都设置为 "${selectedServer}" 吗？`)) {
+                Object.keys(gameData).forEach(windowId => {
+                    Object.keys(gameData[windowId].zones).forEach(zoneId => {
+                        gameData[windowId].zones[zoneId].characters.forEach(char => {
+                            char.server = selectedServer;
+                        });
+                    });
+                });
+                
+                saveUserProgress();
+                renderWindows();
+                updateAllProgress();
+                alert('批量设置完成！');
+            }
+        }
+
+        function toggleServerManagement() {
+            const content = document.getElementById('serverManagementContent');
+            const collapsible = document.querySelector('.collapsible');
+            
+            if (content.classList.contains('show')) {
+                content.classList.remove('show');
+                collapsible.classList.remove('active');
+            } else {
+                content.classList.add('show');
+                collapsible.classList.add('active');
+                updateServerManagementUI();
+            }
+        }
+
+        function updateServerManagementUI() {
+            updateServerListForDeletion();
+            updateCurrentServerList();
+        }
+
+        function updateServerListForDeletion() {
+            const container = document.getElementById('serverListForDeletion');
+            container.innerHTML = '';
+            
+            systemData.serverList.forEach((server, index) => {
+                const serverItem = document.createElement('div');
+                serverItem.className = 'server-item';
+                serverItem.innerHTML = `
+                    <div style="display: flex; align-items: center;">
+                        <input type="checkbox" class="server-checkbox" id="server-${index}" value="${server}"
+                               onchange="toggleServerSelection(this)">
+                        <span>${server}</span>
+                    </div>
+                `;
+                container.appendChild(serverItem);
+            });
+        }
+
+        function toggleServerSelection(checkbox) {
+            const serverItem = checkbox.closest('.server-item');
+            if (checkbox.checked) {
+                serverItem.classList.add('selected');
+            } else {
+                serverItem.classList.remove('selected');
+            }
+        }
+
+        function updateCurrentServerList() {
+            const container = document.getElementById('currentServerList');
+            container.innerHTML = '';
+            
+            if (systemData.serverList.length === 0) {
+                container.innerHTML = '<div style="color: #ccc; text-align: center;">暂无服务器</div>';
+                return;
+            }
+            
+            systemData.serverList.forEach((server, index) => {
+                const serverItem = document.createElement('div');
+                serverItem.className = 'server-item';
+                serverItem.innerHTML = `
+                    <span>${index + 1}. ${server}</span>
+                `;
+                container.appendChild(serverItem);
+            });
+        }
+
+        function batchAddServers() {
+            const textarea = document.getElementById('batchAddServers');
+            const newServers = textarea.value.split('\n')
+                .map(s => s.trim())
+                .filter(s => s.length > 0 && !systemData.serverList.includes(s));
+            
+            if (newServers.length === 0) {
+                alert('没有找到新的服务器名称，或者输入的服务器已经存在！');
+                return;
+            }
+            
+            if (confirm(`确定要添加 ${newServers.length} 个新服务器吗？\n\n${newServers.join('\n')}`)) {
+                systemData.serverList = systemData.serverList.concat(newServers);
+                saveSystemData();
+                updateBatchServerSelect();
+                updateServerManagementUI();
+                renderWindows();
+                textarea.value = '';
+                alert(`成功添加 ${newServers.length} 个服务器！`);
+            }
+        }
+
+        function selectAllServers() {
+            document.querySelectorAll('.server-checkbox').forEach(checkbox => {
+                checkbox.checked = true;
+                checkbox.closest('.server-item').classList.add('selected');
+            });
+        }
+
+        function deselectAllServers() {
+            document.querySelectorAll('.server-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+                checkbox.closest('.server-item').classList.remove('selected');
+            });
+        }
+
+        function batchDeleteServers() {
+            const selectedServers = [];
+            document.querySelectorAll('.server-checkbox:checked').forEach(checkbox => {
+                selectedServers.push(checkbox.value);
+            });
+            
+            if (selectedServers.length === 0) {
+                alert('请先选择要删除的服务器！');
+                return;
+            }
+            
+            if (selectedServers.length === systemData.serverList.length) {
+                alert('不能删除所有服务器，至少要保留一个！');
+                return;
+            }
+            
+            if (confirm(`确定要删除 ${selectedServers.length} 个服务器吗？\n\n${selectedServers.join('\n')}\n\n删除后，使用这些服务器的角色将自动切换到第一个可用服务器。`)) {
+                const remainingServers = systemData.serverList.filter(s => !selectedServers.includes(s));
+                const fallbackServer = remainingServers[0];
+                
+                Object.keys(gameData).forEach(windowId => {
+                    Object.keys(gameData[windowId].zones).forEach(zoneId => {
+                        gameData[windowId].zones[zoneId].characters.forEach(char => {
+                            if (selectedServers.includes(char.server)) {
+                                char.server = fallbackServer;
+                            }
+                        });
+                    });
+                });
+                
+                systemData.serverList = remainingServers;
+                saveSystemData();
+                updateBatchServerSelect();
+                updateServerManagementUI();
+                renderWindows();
+                alert(`成功删除 ${selectedServers.length} 个服务器！`);
+            }
+        }
+
+        function loadDefaultServers() {
+            if (confirm('确定要恢复默认服务器列表吗？这将清除所有自定义服务器并恢复到初始状态。')) {
+                systemData.serverList = [
+                    'AP——Delos 澳洲服',
+                    'US West——Eldorado 美西服', 
+                    'US East——Valhalla 美东服',
+                    'EU Central——Aries 欧洲服'
+                ];
+                
+                Object.keys(gameData).forEach(windowId => {
+                    Object.keys(gameData[windowId].zones).forEach(zoneId => {
+                        gameData[windowId].zones[zoneId].characters.forEach(char => {
+                            if (!systemData.serverList.includes(char.server)) {
+                                char.server = systemData.serverList[0];
+                            }
+                        });
+                    });
+                });
+                
+                saveSystemData();
+                updateBatchServerSelect();
+                updateServerManagementUI();
+                renderWindows();
+                alert('默认服务器列表恢复成功！');
+            }
+        }
+
+        // [这里继续包含所有原有的窗口管理、角色管理等函数...]
+        // 由于篇幅限制，我将在下一部分继续添加其余功能
+
+        // 管理员面板功能
+        function showAdminPanel() {
+            document.getElementById('employeePanel').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            
+            renderAdminStats();
+            renderEmployeeTable();
+        }
+
+        function renderAdminStats() {
+            const employees = Object.keys(systemData.users).filter(key => systemData.users[key].role === 'employee');
+            let totalCompletionRate = 0;
+            let onlineCount = 0;
+            let totalTasks = 0;
+            let bestEmployee = '';
+            let bestRate = 0;
+
+            employees.forEach(username => {
+                const user = systemData.users[username];
+                if (!user.taskConfig) return;
+                
+                const config = user.taskConfig;
+                const userTotalTasks = config.windows * config.zonesPerWindow * config.charactersPerZone;
+                totalTasks += userTotalTasks;
+                
+                const todayRecord = user.dailyRecords?.[currentDate] || {};
+                const completedTasks = Object.values(todayRecord).filter(Boolean).length;
+                const userCompletionRate = userTotalTasks > 0 ? Math.round((completedTasks / userTotalTasks) * 100) : 0;
+                
+                totalCompletionRate += userCompletionRate;
+                if (Object.keys(todayRecord).length > 0) onlineCount++;
+                
+                if (userCompletionRate > bestRate) {
+                    bestRate = userCompletionRate;
+                    bestEmployee = user.name;
+                }
+            });
+
+            const avgCompletionRate = employees.length > 0 ? Math.round(totalCompletionRate / employees.length) : 0;
+
+            document.getElementById('adminTodayProgress').textContent = `${avgCompletionRate}%`;
+            document.getElementById('onlineEmployees').textContent = onlineCount;
+            document.getElementById('bestEmployee').textContent = bestEmployee || '暂无';
+            document.getElementById('totalTasks').textContent = totalTasks;
+        }
+
+        function renderEmployeeTable() {
+            const tbody = document.getElementById('employeeTableBody');
+            tbody.innerHTML = '';
+
+            const employees = Object.keys(systemData.users).filter(key => systemData.users[key].role === 'employee');
+            
+            employees.forEach(username => {
+                const user = systemData.users[username];
+                if (!user.taskConfig) {
+                    user.taskConfig = { windows: 1, zonesPerWindow: 1, charactersPerZone: 1 };
+                }
+                
+                const config = user.taskConfig;
+                const userTotalTasks = config.windows * config.zonesPerWindow * config.charactersPerZone;
+                
+                const todayRecord = user.dailyRecords?.[currentDate] || {};
+                const completedTasks = Object.values(todayRecord).filter(Boolean).length;
+                const todayCompletionRate = userTotalTasks > 0 ? Math.round((completedTasks / userTotalTasks) * 100) : 0;
+                
+                const lastSubmit = Object.keys(todayRecord).length > 0 ? '今天' : '未提交';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${user.name}</strong></td>
+                    <td>${username}</td>
+                    <td>${user.department}</td>
+                    <td>${config.windows}组机 × ${config.zonesPerWindow}号机 × ${config.charactersPerZone}角色</td>
+                    <td>
+                        <div class="performance-bar">
+                            <div class="performance-fill" style="width: ${todayCompletionRate}%"></div>
+                            <div class="performance-text">${completedTasks}/${userTotalTasks} (${todayCompletionRate}%)</div>
+                        </div>
+                    </td>
+                    <td><strong>${user.monthlyStats?.completionRate || 0}%</strong></td>
+                    <td>${lastSubmit}</td>
+                    <td>
+                        <button class="btn btn-primary btn-small" onclick="editUser('${username}')">编辑</button>
+                        <button class="btn btn-secondary btn-small" onclick="viewUserDetail('${username}')">详情</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 用户管理功能
+        function createUser() {
+            const username = document.getElementById('newUsername').value.trim();
+            const name = document.getElementById('newName').value.trim();
+            const department = document.getElementById('newDepartment').value.trim();
+            const password = document.getElementById('newPassword').value.trim();
+            const windows = parseInt(document.getElementById('newWindows').value) || 3;
+            const zones = parseInt(document.getElementById('newZones').value) || 2;
+            const characters = parseInt(document.getElementById('newCharacters').value) || 5;
+
+            if (!username || !name || !department || !password) {
+                alert('请填写所有必填字段！');
+                return;
+            }
+
+            if (systemData.users[username]) {
+                alert('用户名已存在，请选择其他用户名！');
+                return;
+            }
+
+            systemData.users[username] = {
+                name: name,
+                role: 'employee',
+                password: password,
+                department: department,
+                taskConfig: {
+                    windows: windows,
+                    zonesPerWindow: zones,
+                    charactersPerZone: characters
+                },
+                dailyRecords: {},
+                monthlyStats: {
+                    completionRate: 0,
+                    rank: Object.keys(systemData.users).filter(k => systemData.users[k].role === 'employee').length + 1,
+                    streakDays: 0
+                }
+            };
+
+            saveSystemData();
+            updateDemoAccounts();
+            renderAdminStats();
+            renderEmployeeTable();
+            
+            // 清空表单
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newName').value = '';
+            document.getElementById('newDepartment').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('newWindows').value = '3';
+            document.getElementById('newZones').value = '2';
+            document.getElementById('newCharacters').value = '5';
+
+            alert(`用户 "${name}" 创建成功！\n用户名：${username}\n任务配置：${windows}组机 × ${zones}号机 × ${characters}角色`);
+        }
+
+        function editUser(username) {
+            const user = systemData.users[username];
+            if (!user) return;
+
+            // 填充模态框数据
+            document.getElementById('modalUsername').value = username;
+            document.getElementById('modalName').value = user.name;
+            document.getElementById('modalDepartment').value = user.department;
+            document.getElementById('modalWindows').value = user.taskConfig?.windows || 3;
+            document.getElementById('modalZones').value = user.taskConfig?.zonesPerWindow || 2;
+            document.getElementById('modalCharacters').value = user.taskConfig?.charactersPerZone || 5;
+
+            // 显示模态框
+            document.getElementById('userModal').style.display = 'block';
+        }
+
+        function saveUserConfig() {
+            const username = document.getElementById('modalUsername').value;
+            const user = systemData.users[username];
+            if (!user) return;
+
+            user.name = document.getElementById('modalName').value.trim();
+            user.department = document.getElementById('modalDepartment').value.trim();
+            
+            if (!user.taskConfig) user.taskConfig = {};
+            user.taskConfig.windows = parseInt(document.getElementById('modalWindows').value) || 3;
+            user.taskConfig.zonesPerWindow = parseInt(document.getElementById('modalZones').value) || 2;
+            user.taskConfig.charactersPerZone = parseInt(document.getElementById('modalCharacters').value) || 5;
+
+            saveSystemData();
+            updateDemoAccounts();
+            renderAdminStats();
+            renderEmployeeTable();
+            closeUserModal();
+            
+            alert('用户配置保存成功！');
+        }
+
+        function deleteUser() {
+            const username = document.getElementById('modalUsername').value;
+            if (username === 'admin') {
+                alert('不能删除管理员账号！');
+                return;
+            }
+
+            if (confirm(`确定要删除用户 "${systemData.users[username]?.name}" 吗？\n\n删除后将无法恢复用户的所有数据！`)) {
+                delete systemData.users[username];
+                // 删除用户相关的本地数据
+                localStorage.removeItem(`gameData_${username}`);
+                localStorage.removeItem(`user_prefs_${username}`);
+                
+                saveSystemData();
+                updateDemoAccounts();
+                renderAdminStats();
+                renderEmployeeTable();
+                closeUserModal();
+                
+                alert('用户删除成功！');
+            }
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').style.display = 'none';
+        }
+
+        function viewUserDetail(username) {
+            const user = systemData.users[username];
+            if (!user.taskConfig) return;
+            
+            const config = user.taskConfig;
+            const userTotalTasks = config.windows * config.zonesPerWindow * config.charactersPerZone;
+            const todayRecord = user.dailyRecords?.[currentDate] || {};
+            const completedTasks = Object.values(todayRecord).filter(Boolean).length;
+            const todayRate = Math.round((completedTasks / userTotalTasks) * 100);
+            
+            alert(`员工详情：${user.name}\n\n` +
+                  `用户名：${username}\n` +
+                  `部门：${user.department}\n` +
+                  `任务配置：${config.windows}组机 × ${config.zonesPerWindow}号机 × ${config.charactersPerZone}角色\n` +
+                  `今日进度：${completedTasks}/${userTotalTasks} (${todayRate}%)\n` +
+                  `本月完成率：${user.monthlyStats?.completionRate || 0}%\n` +
+                  `连续完成：${user.monthlyStats?.streakDays || 0}天\n` +
+                  `部门排名：第${user.monthlyStats?.rank || 1}名`);
+        }
+
+        // 管理员操作函数
+        function exportReport() {
+            let report = `${systemData.systemTitle} - 员工绩效报表\n`;
+            report += `生成时间：${new Date().toLocaleString()}\n`;
+            report += `===========================================\n\n`;
+            
+            const employees = Object.keys(systemData.users).filter(key => systemData.users[key].role === 'employee');
+            
+            employees.forEach(username => {
+                const user = systemData.users[username];
+                const config = user.taskConfig || { windows: 0, zonesPerWindow: 0, charactersPerZone: 0 };
+                const userTotalTasks = config.windows * config.zonesPerWindow * config.charactersPerZone;
+                const todayRecord = user.dailyRecords?.[currentDate] || {};
+                const completedTasks = Object.values(todayRecord).filter(Boolean).length;
+                const todayRate = userTotalTasks > 0 ? Math.round((completedTasks / userTotalTasks) * 100) : 0;
+                
+                report += `员工：${user.name} (${username})\n`;
+                report += `部门：${user.department}\n`;
+                report += `任务配置：${config.windows}组机 × ${config.zonesPerWindow}号机 × ${config.charactersPerZone}角色\n`;
+                report += `今日完成率：${todayRate}% (${completedTasks}/${userTotalTasks})\n`;
+                report += `本月完成率：${user.monthlyStats?.completionRate || 0}%\n`;
+                report += `连续天数：${user.monthlyStats?.streakDays || 0}天\n\n`;
+            });
+            
+            // 创建下载链接
+            const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `员工绩效报表_${currentDate.replace(/\//g, '-')}.txt`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            alert('📈 报表已生成并下载！');
+        }
+
+        function resetAllEmployeeProgress() {
+            if (confirm('⚠️ 确定要重置所有员工的今日进度吗？此操作不可恢复！')) {
+                Object.keys(systemData.users).forEach(username => {
+                    if (systemData.users[username].role === 'employee') {
+                        if (!systemData.users[username].dailyRecords) {
+                            systemData.users[username].dailyRecords = {};
+                        }
+                        systemData.users[username].dailyRecords[currentDate] = {};
+                        // 清理本地存储的用户数据
+                        localStorage.removeItem(`gameData_${username}`);
+                    }
+                });
+                saveSystemData();
+                renderAdminStats();
+                renderEmployeeTable();
+                alert('✅ 所有员工的今日进度已重置！');
+            }
+        }
+
+        function backupData() {
+            const backupData = {
+                systemData: systemData,
+                backupTime: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `系统数据备份_${currentDate.replace(/\//g, '-')}.json`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            alert('💾 系统数据备份成功！');
+        }
+
+        function calculatePerformance() {
+            let performanceReport = '💰 绩效计算报告\n\n';
+            let totalBonus = 0;
+            
+            const employees = Object.keys(systemData.users).filter(key => systemData.users[key].role === 'employee');
+            const baseBonus = 100; // 基础奖金
+            
+            employees.forEach(username => {
+                const user = systemData.users[username];
+                const monthlyRate = user.monthlyStats?.completionRate || 0;
+                const streakBonus = (user.monthlyStats?.streakDays || 0) * 10;
+                const performanceBonus = Math.round(baseBonus * (monthlyRate / 100) + streakBonus);
+                
+                totalBonus += performanceBonus;
+                performanceReport += `${user.name}：¥${performanceBonus}\n`;
+                performanceReport += `  基础奖金：¥${baseBonus}\n`;
+                performanceReport += `  完成率奖金：¥${Math.round(baseBonus * (monthlyRate / 100))}\n`;
+                performanceReport += `  连续奖金：¥${streakBonus}\n\n`;
+            });
+            
+            performanceReport += `总计奖金：¥${totalBonus}`;
+            alert(performanceReport);
+        }
+
+        // [继续添加所有员工端的功能函数...]
+        // 由于篇幅限制，我将在接下来添加其余必要的功能
+
+        // 窗口和任务管理的核心函数
+        function renderWindows() {
+            const container = document.getElementById('windowsContainer');
+            container.innerHTML = '';
+
+            windowOrder.forEach(windowId => {
+                if (!gameData[windowId]) return;
+
+                const windowDiv = document.createElement('div');
+                windowDiv.className = 'window-card';
+                windowDiv.draggable = true;
+                windowDiv.dataset.windowId = windowId;
+                
+                // 拖拽事件
+                windowDiv.addEventListener('dragstart', handleDragStart);
+                windowDiv.addEventListener('dragover', handleDragOver);
+                windowDiv.addEventListener('drop', handleDrop);
+                windowDiv.addEventListener('dragend', handleDragEnd);
+
+                const windowData = gameData[windowId];
+                const windowCompleted = getWindowProgress(windowId);
+                const windowTotal = getTotalCharactersInWindow(windowId);
+                
+                let zonesTabsHtml = '';
+                let zonesContentHtml = '';
+                
+                Object.keys(windowData.zones).forEach((zoneId, index) => {
+                    const zone = windowData.zones[zoneId];
+                    const zoneProgress = getZoneProgress(windowId, zoneId);
+                    const zoneTotal = zone.characters.length;
+                    
+                    zonesTabsHtml += `
+                        <div class="zone-tab ${index === 0 ? 'active' : ''}" onclick="switchZone(${windowId}, '${zoneId}')">
+                            <span class="zone-tab-content" ondblclick="editZoneName(${windowId}, '${zoneId}')" 
+                                  id="zone-name-${windowId}-${zoneId}">${zone.name}</span>
+                            <span class="zone-progress">(${zoneProgress}/${zoneTotal})</span>
+                            <button class="zone-delete-btn" onclick="deleteZone(${windowId}, '${zoneId}')" 
+                                    title="删除号机">×</button>
+                        </div>
+                    `;
+
+                    const charactersHtml = zone.characters.map((char, charIndex) => {
+                        const charKey = `${windowId}-${zoneId}-${charIndex}`;
+                        const isCompleted = progress[charKey] || false;
+                        
+                        return `
+                            <div class="character-card ${isCompleted ? 'completed' : ''}">
+                                <div class="character-header">
+                                    <input type="checkbox" class="character-checkbox" id="${charKey}" 
+                                           ${isCompleted ? 'checked' : ''} onchange="toggleCharacter('${charKey}')">
+                                    <button class="character-delete" onclick="deleteCharacter(${windowId}, '${zoneId}', ${charIndex})" 
+                                            title="删除角色">×</button>
+                                </div>
+                                <div class="character-server">${char.server}</div>
+                                <div class="character-name" ondblclick="editCharacterName(${windowId}, '${zoneId}', ${charIndex})" 
+                                     id="char-name-${windowId}-${zoneId}-${charIndex}">${char.name}</div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    zonesContentHtml += `
+                        <div class="zone-content ${index === 0 ? 'active' : ''}" id="zone-${windowId}-${zoneId}">
+                            <div class="zone-controls">
+                                <div class="zone-progress-info">${zone.name}: ${zoneProgress}/${zoneTotal}</div>
+                                <div>
+                                    <button class="btn btn-small btn-primary" onclick="selectZone(${windowId}, '${zoneId}')">全选</button>
+                                    <button class="btn btn-small btn-secondary" onclick="clearZone(${windowId}, '${zoneId}')">清空</button>
+                                </div>
+                            </div>
+                            
+                            <div class="server-select-container">
+                                <span class="server-select-label">服务器:</span>
+                                <div class="custom-select">
+                                    <div class="select-display" onclick="toggleServerSelect(${windowId}, '${zoneId}')">
+                                        <span id="selected-server-${windowId}-${zoneId}">${zone.characters[0]?.server || systemData.serverList[0]}</span>
+                                        <div class="select-arrow"></div>
+                                    </div>
+                                    <div class="select-options" id="server-options-${windowId}-${zoneId}">
+                                        <input type="text" class="add-server-input" placeholder="输入新服务器名称后按回车" 
+                                               onkeypress="addServerOnEnter(event, ${windowId}, '${zoneId}')">
+                                        ${systemData.serverList.map(server => `
+                                            <div class="select-option ${server === (zone.characters[0]?.server || systemData.serverList[0]) ? 'selected' : ''}" 
+                                                 onclick="selectServer(${windowId}, '${zoneId}', '${server}')">
+                                                <span>${server}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="characters-grid">
+                                ${charactersHtml}
+                                <div class="add-character-btn" onclick="addCharacter(${windowId}, '${zoneId}')">
+                                    ➕ 添加角色
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                windowDiv.innerHTML = `
+                    <div class="window-header">
+                        <div class="window-title" ondblclick="editWindowName(${windowId})" 
+                             id="window-name-${windowId}">${windowData.name}</div>
+                        <div class="window-progress">${windowCompleted}/${windowTotal}</div>
+                        <div class="window-controls">
+                            <button class="btn btn-small btn-success" onclick="addZone(${windowId})">+号机</button>
+                            <button class="btn btn-small btn-primary" onclick="selectWindow(${windowId})">全选</button>
+                            <button class="btn btn-small btn-secondary" onclick="clearWindow(${windowId})">清空</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteWindow(${windowId})" title="删除组机">×</button>
+                        </div>
+                    </div>
+                    <div class="window-content">
+                        <div class="zones-tabs" id="tabs-${windowId}">
+                            ${zonesTabsHtml}
+                            <button class="zone-add-btn" onclick="addZone(${windowId})">+ 号机</button>
+                        </div>
+                        <div id="zones-${windowId}">
+                            ${zonesContentHtml}
+                        </div>
+                    </div>
+                    <div class="resize-handle"></div>
+                `;
+                
+                container.appendChild(windowDiv);
+            });
+        }
+
+        // 添加所有必要的工具函数
+        function getTotalCharacters() {
+            let total = 0;
+            Object.keys(gameData).forEach(windowId => {
+                Object.keys(gameData[windowId].zones).forEach(zoneId => {
+                    total += gameData[windowId].zones[zoneId].characters.length;
+                });
+            });
+            return total;
+        }
+
+        function getWindowProgress(windowId) {
+            let completed = 0;
+            Object.keys(gameData[windowId].zones).forEach(zoneId => {
+                gameData[windowId].zones[zoneId].characters.forEach((char, charIndex) => {
+                    const charKey = `${windowId}-${zoneId}-${charIndex}`;
+                    if (progress[charKey]) completed++;
+                });
+            });
+            return completed;
+        }
+
+        function getTotalCharactersInWindow(windowId) {
+            let total = 0;
+            Object.keys(gameData[windowId].zones).forEach(zoneId => {
+                total += gameData[windowId].zones[zoneId].characters.length;
+            });
+            return total;
+        }
+
+        function getZoneProgress(windowId, zoneId) {
+            let completed = 0;
+            gameData[windowId].zones[zoneId].characters.forEach((char, charIndex) => {
+                const charKey = `${windowId}-${zoneId}-${charIndex}`;
+                if (progress[charKey]) completed++;
+            });
+            return completed;
+        }
+
+        function updateAllProgress() {
+            const totalCompleted = Object.values(progress).filter(Boolean).length;
+            const totalCharacters = getTotalCharacters();
+            const percentage = totalCharacters > 0 ? Math.round((totalCompleted / totalCharacters) * 100) : 0;
+            const progressBar = document.getElementById('globalProgress');
+            
+            progressBar.textContent = `${totalCompleted}/${totalCharacters} (${percentage}%)`;
+            progressBar.style.width = `${percentage}%`;
+            
+            if (percentage < 30) {
+                progressBar.style.background = 'linear-gradient(90deg, #ff6b6b, #ee5a52)';
+            } else if (percentage < 70) {
+                progressBar.style.background = 'linear-gradient(90deg, #ffc107, #ff8f00)';
+            } else {
+                progressBar.style.background = 'linear-gradient(90deg, #4CAF50, #45a049)';
+            }
+            
+            if (currentUser && currentUser.role === 'employee') {
+                updateEmployeeStats();
+            }
+        }
+
+        // 任务操作函数
+        function selectAllTasks() {
+            Object.keys(gameData).forEach(windowId => {
+                Object.keys(gameData[windowId].zones).forEach(zoneId => {
+                    gameData[windowId].zones[zoneId].characters.forEach((char, charIndex) => {
+                        const charKey = `${windowId}-${zoneId}-${charIndex}`;
+                        progress[charKey] = true;
+                    });
+                });
+            });
+            renderWindows();
+            updateAllProgress();
+        }
+
+        function clearAllTasks() {
+            progress = {};
+            renderWindows();
+            updateAllProgress();
+        }
+
+        function resetAllProgress() {
+            if (confirm('确定要重置今日的所有进度吗？')) {
+                progress = {};
+                renderWindows();
+                updateAllProgress();
+            }
+        }
+
+        function toggleCharacter(charKey) {
+            progress[charKey] = !progress[charKey];
+            renderWindows();
+            updateAllProgress();
+        }
+
+        // 窗口操作函数
+        function addWindow() {
+            const newId = Math.max(...Object.keys(gameData).map(Number), 0) + 1;
+            windowOrder.push(newId);
+            
+            gameData[newId] = {
+                name: `${newId}组机`,
+                zones: {
+                    1: {
+                        name: '1号机',
+                        characters: [{name: '角色1', server: systemData.serverList[0]}]
+                    }
+                }
+            };
+            
+            renderWindows();
+            updateAllProgress();
+        }
+
+        function deleteWindow(windowId) {
+            if (Object.keys(gameData).length <= 1) {
+                alert('至少要保留一个组机！');
+                return;
+            }
+            
+            if (confirm(`确定要删除 ${gameData[windowId].name} 吗？`)) {
+                delete gameData[windowId];
+                windowOrder = windowOrder.filter(id => id !== windowId);
+                
+                Object.keys(progress).forEach(key => {
+                    if (key.startsWith(`${windowId}-`)) {
+                        delete progress[key];
+                    }
+                });
+                
+                renderWindows();
+                updateAllProgress();
+            }
+        }
+
+        function editWindowName(windowId) {
+            const nameElement = document.getElementById(`window-name-${windowId}`);
+            const currentName = nameElement.textContent;
+            
+            const input = document.createElement('input');
+            input.className = 'edit-input';
+            input.value = currentName;
+            
+            nameElement.replaceWith(input);
+            input.focus();
+            input.select();
+            
+            function saveEdit() {
+                const newName = input.value.trim() || currentName;
+                gameData[windowId].name = newName;
+                renderWindows();
+                updateAllProgress();
+            }
+            
+            input.addEventListener('blur', saveEdit);
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') saveEdit();
+            });
+        }
+
+        // 区域操作函数
+        function addZone(windowId) {
+            const zones = gameData[windowId].zones;
+            const newZoneId = Math.max(...Object.keys(zones).map(Number)) + 1;
+            
+            zones[newZoneId] = {
+                name: `${newZoneId}号机`,
+                characters: [{name: '角色1', server: systemData.serverList[0]}]
+            };
+            
+            renderWindows();
+            updateAllProgress();
+        }
+
+        function deleteZone(windowId, zoneId) {
+            event.stopPropagation();
+            
+            if (Object.keys(gameData[windowId].zones).length <= 1) {
+                alert('每个组机至少要保留一个号机！');
+                return;
+            }
+            
+            if (confirm(`确定要删除 ${gameData[windowId].zones[zoneId].name} 吗？`)) {
+                delete gameData[windowId].zones[zoneId];
+                
+                Object.keys(progress).forEach(key => {
+                    if (key.startsWith(`${windowId}-${zoneId}-`)) {
+                        delete progress[key];
+                    }
+                });
+                
+                renderWindows();
+                updateAllProgress();
+            }
+        }
+
+        function editZoneName(windowId, zoneId) {
+            event.stopPropagation();
+            const nameElement = document.getElementById(`zone-name-${windowId}-${zoneId}`);
+            const currentName = nameElement.textContent;
+            
+            const input = document.createElement('input');
+            input.className = 'edit-input';
+            input.value = currentName;
+            input.style.width = '80px';
+            
+            nameElement.replaceWith(input);
+            input.focus();
+            input.select();
+            
+            function saveEdit() {
+                const newName = input.value.trim() || currentName;
+                gameData[windowId].zones[zoneId].name = newName;
+                renderWindows();
+                updateAllProgress();
+            }
+            
+            input.addEventListener('blur', saveEdit);
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') saveEdit();
+            });
+        }
+
+        function switchZone(windowId, zoneId) {
+            document.querySelectorAll(`#tabs-${windowId} .zone-tab`).forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`#tabs-${windowId} .zone-tab:nth-child(${Object.keys(gameData[windowId].zones).indexOf(zoneId) + 1})`).classList.add('active');
+
+            document.querySelectorAll(`#zones-${windowId} .zone-content`).forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`zone-${windowId}-${zoneId}`).classList.add('active');
+        }
+
+        // 角色操作函数
+        function addCharacter(windowId, zoneId) {
+            const characters = gameData[windowId].zones[zoneId].characters;
+            const newCharIndex = characters.length + 1;
+            
+            characters.push({
+                name: `角色${newCharIndex}`,
+                server: characters[0]?.server || systemData.serverList[0]
+            });
+            
+            renderWindows();
+            updateAllProgress();
+        }
+
+        function deleteCharacter(windowId, zoneId, charIndex) {
+            const characters = gameData[windowId].zones[zoneId].characters;
+            
+            if (characters.length <= 1) {
+                alert('每个号机至少要保留一个角色！');
+                return;
+            }
+            
+            if (confirm(`确定要删除角色 ${characters[charIndex].name} 吗？`)) {
+                characters.splice(charIndex, 1);
+                
+                const oldProgress = {...progress};
+                Object.keys(oldProgress).forEach(key => {
+                    if (key.startsWith(`${windowId}-${zoneId}-`)) {
+                        delete progress[key];
+                    }
+                });
+                
+                characters.forEach((char, index) => {
+                    const oldKeys = Object.keys(oldProgress).filter(k => k.startsWith(`${windowId}-${zoneId}-`));
+                    const matchingKey = oldKeys[index];
+                    if (matchingKey && oldProgress[matchingKey]) {
+                        progress[`${windowId}-${zoneId}-${index}`] = oldProgress[matchingKey];
+                    }
+                });
+                
+                renderWindows();
+                updateAllProgress();
+            }
+        }
+
+        function editCharacterName(windowId, zoneId, charIndex) {
+            const nameElement = document.getElementById(`char-name-${windowId}-${zoneId}-${charIndex}`);
+            const currentName = nameElement.textContent;
+            
+            const input = document.createElement('input');
+            input.className = 'edit-input';
+            input.value = currentName;
+            
+            nameElement.replaceWith(input);
+            input.focus();
+            input.select();
+            
+            function saveEdit() {
+                const newName = input.value.trim() || currentName;
+                gameData[windowId].zones[zoneId].characters[charIndex].name = newName;
+                renderWindows();
+                updateAllProgress();
+            }
+            
+            input.addEventListener('blur', saveEdit);
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') saveEdit();
+            });
+        }
+
+        // 服务器选择相关函数
+        function toggleServerSelect(windowId, zoneId) {
+            const selectElement = document.getElementById(`server-options-${windowId}-${zoneId}`);
+            const displayElement = selectElement.previousElementSibling;
+            
+            selectElement.classList.toggle('show');
+            displayElement.classList.toggle('open');
+            
+            document.querySelectorAll('.select-options').forEach(el => {
+                if (el !== selectElement) {
+                    el.classList.remove('show');
+                }
+            });
+            document.querySelectorAll('.select-display').forEach(el => {
+                if (el !== displayElement) {
+                    el.classList.remove('open');
+                }
+            });
+        }
+
+        function selectServer(windowId, zoneId, serverName) {
+            gameData[windowId].zones[zoneId].characters.forEach(char => {
+                char.server = serverName;
+            });
+            
+            renderWindows();
+            updateAllProgress();
+        }
+
+        function addServerOnEnter(event, windowId, zoneId) {
+            if (event.key === 'Enter') {
+                const serverName = event.target.value.trim();
+                if (serverName && !systemData.serverList.includes(serverName)) {
+                    systemData.serverList.push(serverName);
+                    saveSystemData();
+                    updateBatchServerSelect();
+                    selectServer(windowId, zoneId, serverName);
+                }
+                event.target.value = '';
+            }
+        }
+
+        // 选择操作函数
+        function selectWindow(windowId) {
+            Object.keys(gameData[windowId].zones).forEach(zoneId => {
+                gameData[windowId].zones[zoneId].characters.forEach((char, charIndex) => {
+                    const charKey = `${windowId}-${zoneId}-${charIndex}`;
+                    progress[charKey] = true;
+                });
+            });
+            renderWindows();
+            updateAllProgress();
+        }
+
+        function clearWindow(windowId) {
+            Object.keys(gameData[windowId].zones).forEach(zoneId => {
+                gameData[windowId].zones[zoneId].characters.forEach((char, charIndex) => {
+                    const charKey = `${windowId}-${zoneId}-${charIndex}`;
+                    delete progress[charKey];
+                });
+            });
+            renderWindows();
+            updateAllProgress();
+        }
+
+        function selectZone(windowId, zoneId) {
+            gameData[windowId].zones[zoneId].characters.forEach((char, charIndex) => {
+                const charKey = `${windowId}-${zoneId}-${charIndex}`;
+                progress[charKey] = true;
+            });
+            renderWindows();
+            updateAllProgress();
+        }
+
+        function clearZone(windowId, zoneId) {
+            gameData[windowId].zones[zoneId].characters.forEach((char, charIndex) => {
+                const charKey = `${windowId}-${zoneId}-${charIndex}`;
+                delete progress[charKey];
+            });
+            renderWindows();
+            updateAllProgress();
+        }
+
+        // 拖拽相关函数
+        function handleDragStart(e) {
+            draggedElement = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            if (this !== draggedElement) {
+                this.classList.add('drag-over');
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+            
+            if (this !== draggedElement) {
+                const draggedId = parseInt(draggedElement.dataset.windowId);
+                const targetId = parseInt(this.dataset.windowId);
+                
+                const draggedIndex = windowOrder.indexOf(draggedId);
+                const targetIndex = windowOrder.indexOf(targetId);
+                
+                windowOrder.splice(draggedIndex, 1);
+                windowOrder.splice(targetIndex, 0, draggedId);
+                
+                renderWindows();
+                updateAllProgress();
+            }
+            
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.window-card').forEach(card => {
+                card.classList.remove('drag-over');
+            });
+        }
+
+        // 点击外部关闭下拉框
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.custom-select')) {
+                document.querySelectorAll('.select-options').forEach(el => {
+                    el.classList.remove('show');
+                });
+                document.querySelectorAll('.select-display').forEach(el => {
+                    el.classList.remove('open');
+                });
+            }
+        });
+
+        // 模态框点击外部关闭
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('userModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // ==================== 新增功能：搜索和筛选 ====================
+        
+        function initSearchFilters() {
+            const serverFilter = document.getElementById('serverFilter');
+            serverFilter.innerHTML = '<option value="">所有服务器</option>';
+            
+            systemData.serverList.forEach(server => {
+                const option = document.createElement('option');
+                option.value = server;
+                option.textContent = server;
+                serverFilter.appendChild(option);
+            });
+        }
+
+        function filterCharacters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const serverFilter = document.getElementById('serverFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            isFiltering = true;
+            filteredCharacters = [];
+            
+            Object.keys(gameData).forEach(windowId => {
+                Object.keys(gameData[windowId].zones).forEach(zoneId => {
+                    gameData[windowId].zones[zoneId].characters.forEach((char, charIndex) => {
+                        const charKey = `${windowId}-${zoneId}-${charIndex}`;
+                        const isCompleted = progress[charKey] || false;
+                        
+                        let matches = true;
+                        
+                        // 名称搜索
+                        if (searchTerm && !char.name.toLowerCase().includes(searchTerm)) {
+                            matches = false;
+                        }
+                        
+                        // 服务器筛选
+                        if (serverFilter && char.server !== serverFilter) {
+                            matches = false;
+                        }
+                        
+                        // 状态筛选
+                        if (statusFilter) {
+                            if (statusFilter === 'completed' && !isCompleted) {
+                                matches = false;
+                            } else if (statusFilter === 'pending' && isCompleted) {
+                                matches = false;
+                            }
+                        }
+                        
+                        if (matches) {
+                            filteredCharacters.push({
+                                windowId,
+                                zoneId,
+                                charIndex,
+                                char,
+                                charKey,
+                                isCompleted
+                            });
+                        }
+                    });
+                });
+            });
+            
+            updateSearchResultsInfo();
+            renderWindows();
+        }
+
+        function updateSearchResultsInfo() {
+            const totalCharacters = getTotalCharacters();
+            const filteredCount = filteredCharacters.length;
+            const infoElement = document.getElementById('searchResultsInfo');
+            
+            if (isFiltering && filteredCount < totalCharacters) {
+                infoElement.textContent = `显示 ${filteredCount}/${totalCharacters} 个角色`;
+                infoElement.style.display = 'block';
+            } else {
+                infoElement.style.display = 'none';
+            }
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('serverFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            isFiltering = false;
+            filteredCharacters = [];
+            updateSearchResultsInfo();
+            renderWindows();
+        }
+
+        // ==================== 新增功能：快捷键支持 ====================
+        
+        function initKeyboardShortcuts() {
+            document.addEventListener('keydown', function(e) {
+                // 防止在输入框中触发快捷键
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                    return;
+                }
+                
+                const ctrl = e.ctrlKey || e.metaKey;
+                
+                if (ctrl && e.key === 'a') {
+                    e.preventDefault();
+                    selectAllTasks();
+                } else if (ctrl && e.key === 'd') {
+                    e.preventDefault();
+                    clearAllTasks();
+                } else if (ctrl && e.key === 's') {
+                    e.preventDefault();
+                    saveUserProgress();
+                } else if (ctrl && e.key === 'Enter') {
+                    e.preventDefault();
+                    if (currentUser && currentUser.role === 'employee') {
+                        submitProgress();
+                    }
+                } else if (ctrl && e.key === 'f') {
+                    e.preventDefault();
+                    document.getElementById('searchInput').focus();
+                } else if (ctrl && e.key === 'n') {
+                    e.preventDefault();
+                    addWindow();
+                } else if (ctrl && e.key === 'q') {
+                    e.preventDefault();
+                    logout();
+                } else if (e.key === 'F1') {
+                    e.preventDefault();
+                    toggleShortcuts();
+                }
+            });
+        }
+
+        function toggleShortcuts() {
+            const panel = document.getElementById('shortcutsPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // ==================== 新增功能：移动端支持 ====================
+        
+        function switchMobileTab(tab) {
+            // 更新按钮状态
+            document.querySelectorAll('.mobile-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 根据标签页显示/隐藏相应内容
+            const sections = {
+                'tasks': ['.search-filter-section', '.backup-restore-section', '.windows-container'],
+                'servers': ['.batch-server-controls'],
+                'backup': ['.backup-restore-section'],
+                'stats': ['.stats-grid']
+            };
+            
+            // 隐藏所有内容
+            document.querySelectorAll('.search-filter-section, .backup-restore-section, .batch-server-controls, .windows-container, .stats-grid').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // 显示选中标签页的内容
+            if (sections[tab]) {
+                sections[tab].forEach(selector => {
+                    document.querySelectorAll(selector).forEach(el => {
+                        el.style.display = '';
+                    });
+                });
+            }
+        }
+
+        // ==================== 新增功能：数据备份恢复 ====================
+        
+        function backupUserData() {
+            const userData = {
+                gameData: gameData,
+                windowOrder: windowOrder,
+                progress: progress,
+                userPreferences: {
+                    panelTitle: panelTitle,
+                    welcomeMessage: welcomeMessage
+                },
+                backupTime: new Date().toISOString(),
+                username: currentUser.username,
+                version: '2.0'
+            };
+            
+            const blob = new Blob([JSON.stringify(userData, null, 2)], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `用户数据备份_${currentUser.username}_${currentDate.replace(/\//g, '-')}.json`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            alert('✅ 用户数据备份成功！');
+        }
+
+        function restoreUserData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const userData = JSON.parse(e.target.result);
+                    
+                    if (confirm('确定要恢复数据吗？这将覆盖当前的所有数据！')) {
+                        if (userData.gameData) gameData = userData.gameData;
+                        if (userData.windowOrder) windowOrder = userData.windowOrder;
+                        if (userData.progress) progress = userData.progress;
+                        if (userData.userPreferences) {
+                            if (userData.userPreferences.panelTitle) {
+                                panelTitle = userData.userPreferences.panelTitle;
+                                document.getElementById('employeePanelTitle').textContent = panelTitle;
+                            }
+                            if (userData.userPreferences.welcomeMessage) {
+                                welcomeMessage = userData.userPreferences.welcomeMessage;
+                                document.getElementById('welcomeText').innerHTML = welcomeMessage;
+                            }
+                        }
+                        
+                        saveUserProgress();
+                        renderWindows();
+                        updateAllProgress();
+                        alert('✅ 数据恢复成功！');
+                    }
+                } catch (error) {
+                    alert('❌ 文件格式错误，请选择正确的备份文件！');
+                }
+            };
+            reader.readAsText(file);
+            
+            // 清空文件输入
+            event.target.value = '';
+        }
+
+        // ==================== 新增功能：多格式导出 ====================
+        
+        function exportToExcel() {
+            let csvContent = '组机,号机,角色名称,服务器,完成状态,完成时间\n';
+            
+            Object.keys(gameData).forEach(windowId => {
+                Object.keys(gameData[windowId].zones).forEach(zoneId => {
+                    gameData[windowId].zones[zoneId].characters.forEach((char, charIndex) => {
+                        const charKey = `${windowId}-${zoneId}-${charIndex}`;
+                        const isCompleted = progress[charKey] || false;
+                        const completedTime = isCompleted ? new Date().toLocaleString() : '';
+                        
+                        csvContent += `${gameData[windowId].name},${gameData[windowId].zones[zoneId].name},${char.name},${char.server},${isCompleted ? '已完成' : '未完成'},${completedTime}\n`;
+                    });
+                });
+            });
+            
+            // 创建Excel格式的CSV文件
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `任务数据_${currentUser.username}_${currentDate.replace(/\//g, '-')}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            alert('📊 Excel格式数据导出成功！');
+        }
+
+        function exportToCSV() {
+            let csvContent = '组机,号机,角色名称,服务器,完成状态\n';
+            
+            Object.keys(gameData).forEach(windowId => {
+                Object.keys(gameData[windowId].zones).forEach(zoneId => {
+                    gameData[windowId].zones[zoneId].characters.forEach((char, charIndex) => {
+                        const charKey = `${windowId}-${zoneId}-${charIndex}`;
+                        const isCompleted = progress[charKey] || false;
+                        
+                        csvContent += `${gameData[windowId].name},${gameData[windowId].zones[zoneId].name},${char.name},${char.server},${isCompleted ? '已完成' : '未完成'}\n`;
+                    });
+                });
+            });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `任务数据_${currentUser.username}_${currentDate.replace(/\//g, '-')}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            alert('📋 CSV格式数据导出成功！');
+        }
+
+        // ==================== 修改现有函数以支持筛选 ====================
+        
+        // 修改renderWindows函数以支持筛选显示
+        function renderWindows() {
+            const container = document.getElementById('windowsContainer');
+            container.innerHTML = '';
+
+            windowOrder.forEach(windowId => {
+                if (!gameData[windowId]) return;
+
+                const windowDiv = document.createElement('div');
+                windowDiv.className = 'window-card';
+                windowDiv.draggable = true;
+                windowDiv.dataset.windowId = windowId;
+                
+                // 拖拽事件
+                windowDiv.addEventListener('dragstart', handleDragStart);
+                windowDiv.addEventListener('dragover', handleDragOver);
+                windowDiv.addEventListener('drop', handleDrop);
+                windowDiv.addEventListener('dragend', handleDragEnd);
+
+                const windowData = gameData[windowId];
+                const windowCompleted = getWindowProgress(windowId);
+                const windowTotal = getTotalCharactersInWindow(windowId);
+                
+                let zonesTabsHtml = '';
+                let zonesContentHtml = '';
+                
+                Object.keys(windowData.zones).forEach((zoneId, index) => {
+                    const zone = windowData.zones[zoneId];
+                    const zoneProgress = getZoneProgress(windowId, zoneId);
+                    const zoneTotal = zone.characters.length;
+                    
+                    zonesTabsHtml += `
+                        <div class="zone-tab ${index === 0 ? 'active' : ''}" onclick="switchZone(${windowId}, '${zoneId}')">
+                            <span class="zone-tab-content" ondblclick="editZoneName(${windowId}, '${zoneId}')" 
+                                  id="zone-name-${windowId}-${zoneId}">${zone.name}</span>
+                            <span class="zone-progress">(${zoneProgress}/${zoneTotal})</span>
+                            <button class="zone-delete-btn" onclick="deleteZone(${windowId}, '${zoneId}')" 
+                                    title="删除号机">×</button>
+                        </div>
+                    `;
+
+                    const charactersHtml = zone.characters.map((char, charIndex) => {
+                        const charKey = `${windowId}-${zoneId}-${charIndex}`;
+                        const isCompleted = progress[charKey] || false;
+                        
+                        // 检查是否应该显示此角色（筛选功能）
+                        let shouldShow = true;
+                        if (isFiltering) {
+                            shouldShow = filteredCharacters.some(fc => 
+                                fc.windowId == windowId && 
+                                fc.zoneId == zoneId && 
+                                fc.charIndex == charIndex
+                            );
+                        }
+                        
+                        if (!shouldShow) return '';
+                        
+                        return `
+                            <div class="character-card ${isCompleted ? 'completed' : ''}">
+                                <div class="character-header">
+                                    <input type="checkbox" class="character-checkbox" id="${charKey}" 
+                                           ${isCompleted ? 'checked' : ''} onchange="toggleCharacter('${charKey}')">
+                                    <button class="character-delete" onclick="deleteCharacter(${windowId}, '${zoneId}', ${charIndex})" 
+                                            title="删除角色">×</button>
+                                </div>
+                                <div class="character-server">${char.server}</div>
+                                <div class="character-name" ondblclick="editCharacterName(${windowId}, '${zoneId}', ${charIndex})" 
+                                     id="char-name-${windowId}-${zoneId}-${charIndex}">${char.name}</div>
+                            </div>
+                        `;
+                    }).filter(html => html !== '').join('');
+
+                    zonesContentHtml += `
+                        <div class="zone-content ${index === 0 ? 'active' : ''}" id="zone-${windowId}-${zoneId}">
+                            <div class="zone-controls">
+                                <div class="zone-progress-info">${zone.name}: ${zoneProgress}/${zoneTotal}</div>
+                                <div>
+                                    <button class="btn btn-small btn-primary" onclick="selectZone(${windowId}, '${zoneId}')">全选</button>
+                                    <button class="btn btn-small btn-secondary" onclick="clearZone(${windowId}, '${zoneId}')">清空</button>
+                                </div>
+                            </div>
+                            
+                            <div class="server-select-container">
+                                <span class="server-select-label">服务器:</span>
+                                <div class="custom-select">
+                                    <div class="select-display" onclick="toggleServerSelect(${windowId}, '${zoneId}')">
+                                        <span id="selected-server-${windowId}-${zoneId}">${zone.characters[0]?.server || systemData.serverList[0]}</span>
+                                        <div class="select-arrow"></div>
+                                    </div>
+                                    <div class="select-options" id="server-options-${windowId}-${zoneId}">
+                                        <input type="text" class="add-server-input" placeholder="输入新服务器名称后按回车" 
+                                               onkeypress="addServerOnEnter(event, ${windowId}, '${zoneId}')">
+                                        ${systemData.serverList.map(server => `
+                                            <div class="select-option ${server === (zone.characters[0]?.server || systemData.serverList[0]) ? 'selected' : ''}" 
+                                                 onclick="selectServer(${windowId}, '${zoneId}', '${server}')">
+                                                <span>${server}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="characters-grid">
+                                ${charactersHtml}
+                                <div class="add-character-btn" onclick="addCharacter(${windowId}, '${zoneId}')">
+                                    ➕ 添加角色
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                windowDiv.innerHTML = `
+                    <div class="window-header">
+                        <div class="window-title" ondblclick="editWindowName(${windowId})" 
+                             id="window-name-${windowId}">${windowData.name}</div>
+                        <div class="window-progress">${windowCompleted}/${windowTotal}</div>
+                        <div class="window-controls">
+                            <button class="btn btn-small btn-success" onclick="addZone(${windowId})">+号机</button>
+                            <button class="btn btn-small btn-primary" onclick="selectWindow(${windowId})">全选</button>
+                            <button class="btn btn-small btn-secondary" onclick="clearWindow(${windowId})">清空</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteWindow(${windowId})" title="删除组机">×</button>
+                        </div>
+                    </div>
+                    <div class="window-content">
+                        <div class="zones-tabs" id="tabs-${windowId}">
+                            ${zonesTabsHtml}
+                            <button class="zone-add-btn" onclick="addZone(${windowId})">+ 号机</button>
+                        </div>
+                        <div id="zones-${windowId}">
+                            ${zonesContentHtml}
+                        </div>
+                    </div>
+                    <div class="resize-handle"></div>
+                `;
+                
+                container.appendChild(windowDiv);
+            });
+        }
+
+        // 页面加载事件
+        window.onload = function() {
+            init();
+            initKeyboardShortcuts();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # 代码质量检查
+  lint:
+    name: Code Quality Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check HTML syntax
+        run: |
+          echo "🔍 检查HTML语法..."
+          # 简单的HTML语法检查
+          if grep -q "<!DOCTYPE html>" index.html; then
+            echo "✅ HTML文档类型声明正确"
+          else
+            echo "❌ 缺少HTML文档类型声明"
+            exit 1
+          fi
+
+      - name: Check file structure
+        run: |
+          echo "📁 检查文件结构..."
+          required_files=("index.html" "Dockerfile" "docker-compose.yml")
+          for file in "${required_files[@]}"; do
+            if [ -f "$file" ]; then
+              echo "✅ $file 存在"
+            else
+              echo "❌ $file 不存在"
+              exit 1
+            fi
+          done
+
+  # Docker镜像构建和测试
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    needs: lint
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+      image-digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha,prefix={{branch}}-
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+            REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
+
+      - name: Test Docker image
+        run: |
+          echo "🧪 测试Docker镜像..."
+          # 启动容器进行健康检查
+          docker run --rm -d --name test-container -p 8080:80 ${{ steps.meta.outputs.tags }}
+          
+          # 等待服务启动
+          sleep 10
+          
+          # 检查健康状态
+          if curl -f http://localhost:8080/health; then
+            echo "✅ 健康检查通过"
+          else
+            echo "❌ 健康检查失败"
+            docker logs test-container
+            exit 1
+          fi
+          
+          # 检查主页面
+          if curl -f http://localhost:8080/ | grep -q "新世界任务管理系统"; then
+            echo "✅ 主页面加载正常"
+          else
+            echo "❌ 主页面加载失败"
+            exit 1
+          fi
+          
+          # 停止测试容器
+          docker stop test-container
+
+  # 安全扫描
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.event_name != 'pull_request'
+    steps:
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ needs.build-and-test.outputs.image-tag }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # 部署到演示环境
+  deploy-demo:
+    name: Deploy to Demo
+    runs-on: ubuntu-latest
+    needs: [build-and-test, security-scan]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: demo
+      url: https://demo.example.com
+    steps:
+      - name: Deploy to demo environment
+        run: |
+          echo "🚀 部署到演示环境..."
+          echo "镜像: ${{ needs.build-and-test.outputs.image-tag }}"
+          echo "摘要: ${{ needs.build-and-test.outputs.image-digest }}"
+          # 这里可以添加实际的部署脚本
+          # 例如：kubectl apply -f k8s/demo/ 或者 docker-compose up -d
+
+  # 创建GitHub Release
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [build-and-test, security-scan]
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          echo "## 🎉 新版本发布" > CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "### 🚀 新增功能" >> CHANGELOG.md
+          echo "- 优化了界面交互体验" >> CHANGELOG.md
+          echo "- 增强了数据安全性" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "### 🐛 问题修复" >> CHANGELOG.md
+          echo "- 修复了已知的UI问题" >> CHANGELOG.md
+          echo "- 优化了性能表现" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "### 📦 Docker镜像" >> CHANGELOG.md
+          echo "- 镜像: \`${{ needs.build-and-test.outputs.image-tag }}\`" >> CHANGELOG.md
+          echo "- 摘要: \`${{ needs.build-and-test.outputs.image-digest }}\`" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "### 🚀 快速部署" >> CHANGELOG.md
+          echo "\`\`\`bash" >> CHANGELOG.md
+          echo "docker run -d -p 80:80 ${{ needs.build-and-test.outputs.image-tag }}" >> CHANGELOG.md
+          echo "\`\`\`" >> CHANGELOG.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: ${{ contains(github.ref, '-') }}
+          files: |
+            index.html
+            docker-compose.yml
+            README.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # 部署到生产环境
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build-and-test, security-scan, release]
+    if: startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-')
+    environment:
+      name: production
+      url: https://nw-task-manager.example.com
+    steps:
+      - name: Deploy to production
+        run: |
+          echo "🚀 部署到生产环境..."
+          echo "版本: ${{ github.ref_name }}"
+          echo "镜像: ${{ needs.build-and-test.outputs.image-tag }}"
+          # 这里添加生产环境部署脚本
+
+  # 通知
+  notify:
+    name: Notification
+    runs-on: ubuntu-latest
+    needs: [build-and-test, security-scan]
+    if: always()
+    steps:
+      - name: Notify deployment status
+        run: |
+          if [ "${{ needs.build-and-test.result }}" == "success" ] && [ "${{ needs.security-scan.result }}" == "success" ]; then
+            echo "✅ 构建和部署成功！"
+          else
+            echo "❌ 构建或部署失败！"
+          fi

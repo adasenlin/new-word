@@ -1,0 +1,284 @@
+name: Release Management
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.0.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as prerelease'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      is-prerelease: ${{ steps.version.outputs.is-prerelease }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+            IS_PRERELEASE="${{ github.event.inputs.prerelease }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/}"
+            # 检查是否为预发布版本（包含 alpha, beta, rc）
+            if [[ "$VERSION" =~ (alpha|beta|rc) ]]; then
+              IS_PRERELEASE="true"
+            else
+              IS_PRERELEASE="false"
+            fi
+          fi
+          
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "is-prerelease=${IS_PRERELEASE}" >> $GITHUB_OUTPUT
+          echo "short-version=${VERSION#v}" >> $GITHUB_OUTPUT
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          echo "## 🎉 新世界任务管理系统 ${{ steps.version.outputs.version }}" > CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "### 📅 发布时间" >> CHANGELOG.md
+          echo "$(date '+%Y年%m月%d日 %H:%M:%S')" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          
+          # 获取上一个tag
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          
+          if [ -n "$PREVIOUS_TAG" ]; then
+            echo "### 📝 更新内容" >> CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            # 获取commit信息
+            git log ${PREVIOUS_TAG}..HEAD --pretty=format:"- %s (%h)" --reverse >> CHANGELOG.md
+            echo "" >> CHANGELOG.md
+          else
+            echo "### 🚀 首次发布" >> CHANGELOG.md
+            echo "- 新世界任务管理系统正式发布" >> CHANGELOG.md
+            echo "- 支持多组机、多号机、多角色任务管理" >> CHANGELOG.md
+            echo "- 提供管理员和员工双重权限系统" >> CHANGELOG.md
+            echo "- 支持实时进度追踪和数据导出" >> CHANGELOG.md
+          fi
+          
+          echo "" >> CHANGELOG.md
+          echo "### 🐳 Docker 镜像" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "#### 快速部署" >> CHANGELOG.md
+          echo "\`\`\`bash" >> CHANGELOG.md
+          echo "# 拉取并运行最新版本" >> CHANGELOG.md
+          echo "docker run -d -p 80:80 --name nw-task-manager ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }}" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "# 使用 docker-compose" >> CHANGELOG.md
+          echo "curl -O https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.version }}/docker-compose.yml" >> CHANGELOG.md
+          echo "docker-compose up -d" >> CHANGELOG.md
+          echo "\`\`\`" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "#### 支持平台" >> CHANGELOG.md
+          echo "- linux/amd64 (x86_64)" >> CHANGELOG.md
+          echo "- linux/arm64 (ARM64)" >> CHANGELOG.md
+          echo "- linux/arm/v7 (ARMv7)" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "### 🔗 相关链接" >> CHANGELOG.md
+          echo "- [📖 使用文档](https://github.com/${{ github.repository }}#readme)" >> CHANGELOG.md
+          echo "- [🐳 Docker Hub](https://ghcr.io/${{ github.repository }})" >> CHANGELOG.md
+          echo "- [🐛 问题反馈](https://github.com/${{ github.repository }}/issues)" >> CHANGELOG.md
+
+      - name: Create tag (if workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ steps.version.outputs.version }}" -m "Release ${{ steps.version.outputs.version }}"
+          git push origin "${{ steps.version.outputs.version }}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: ${{ steps.version.outputs.version }}
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: ${{ steps.version.outputs.is-prerelease }}
+          files: |
+            index.html
+            docker-compose.yml
+            Dockerfile
+            nginx.conf
+            deploy.sh
+            deploy.bat
+            README.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-release-images:
+    name: Build Release Images
+    runs-on: ubuntu-latest
+    needs: create-release
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        platform:
+          - linux/amd64
+          - linux/arm64
+          - linux/arm/v7
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        if: matrix.platform != 'linux/amd64'
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get platform arch
+        id: platform
+        run: |
+          case "${{ matrix.platform }}" in
+            "linux/amd64") echo "arch=amd64" >> $GITHUB_OUTPUT ;;
+            "linux/arm64") echo "arch=arm64" >> $GITHUB_OUTPUT ;;
+            "linux/arm/v7") echo "arch=armv7" >> $GITHUB_OUTPUT ;;
+          esac
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ needs.create-release.outputs.version }}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=semver,pattern={{version}},value=${{ needs.create-release.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ needs.create-release.outputs.version }}
+            type=semver,pattern={{major}},value=${{ needs.create-release.outputs.version }}
+
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: ${{ matrix.platform }}
+          labels: ${{ steps.meta.outputs.labels }}
+          outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=${{ steps.platform.outputs.arch }}
+          cache-to: type=gha,mode=max,scope=${{ steps.platform.outputs.arch }}
+          build-args: |
+            BUILDTIME=${{ github.event.head_commit.timestamp }}
+            VERSION=${{ needs.create-release.outputs.version }}
+            REVISION=${{ github.sha }}
+
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v3
+        with:
+          name: digests-${{ needs.create-release.outputs.version }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge-release-manifests:
+    name: Merge Release Manifests
+    runs-on: ubuntu-latest
+    needs: [create-release, build-release-images]
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v3
+        with:
+          name: digests-${{ needs.create-release.outputs.version }}
+          path: /tmp/digests
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ needs.create-release.outputs.version }}
+            type=raw,value=latest,enable=${{ needs.create-release.outputs.is-prerelease == 'false' }}
+            type=semver,pattern={{version}},value=${{ needs.create-release.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ needs.create-release.outputs.version }}
+            type=semver,pattern={{major}},value=${{ needs.create-release.outputs.version }}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@sha256:%s ' *)
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.create-release.outputs.version }}
+
+      - name: Update release with image info
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.create-release.outputs.version }}
+          append_body: true
+          body: |
+            
+            ---
+            
+            ### 🏗️ 构建信息
+            
+            - **构建时间**: ${{ github.event.head_commit.timestamp }}
+            - **Git SHA**: `${{ github.sha }}`
+            - **镜像标签**: `${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.create-release.outputs.version }}`
+            
+            ### ✅ 镜像验证
+            
+            ```bash
+            # 验证镜像完整性
+            docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.create-release.outputs.version }}
+            ```
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
